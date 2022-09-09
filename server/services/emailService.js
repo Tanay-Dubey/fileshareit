@@ -2,7 +2,9 @@ const nodemailer = require("nodemailer");
 
 module.exports= async ({ from, to, subject, text, html })=>{
     let transporter = nodemailer.createTransport({
-        service: 'gmail',
+        host:SMTP_HOST,
+        port:SMTP_PORT,
+        secure:true,
         auth: {
             user: process.env.MAIL_USER,
             pass: process.env.MAIL_PASS
@@ -10,7 +12,7 @@ module.exports= async ({ from, to, subject, text, html })=>{
     });
 
     let info=await transporter.sendMail({
-        from:from,
+        from:from, 
         to:to,
         subject:subject,
         text:text,
@@ -22,4 +24,3 @@ module.exports= async ({ from, to, subject, text, html })=>{
 
 
 
-module.exports = sendMail
