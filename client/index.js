@@ -15,24 +15,25 @@ const emailForm = document.querySelector("#emailForm");
 
 const toast = document.querySelector(".toast");
 
-const baseURL = "https://innshare.herokuapp.com";
+const baseURL = "http://localhost:3000";
 const uploadURL = `${baseURL}/api/files`;
 const emailURL = `${baseURL}/api/files/send`;
 
 const maxAllowedSize = 100 * 1024 * 1024; //100mb
 
 
-browseBtn.addEventListener("click", () => {
+browseBtn.addEventListener("click", (event) => {  //Click the browse button to open a file
+  event.preventDefault();
   fileInput.click();
 });
 
-dropZone.addEventListener("drop", (e) => {
+dropZone.addEventListener("drop", (e) => {  
   e.preventDefault();
   //   console.log("dropped", e.dataTransfer.files[0].name);
-  const files = e.dataTransfer.files;
+  const files = e.dataTransfer.files;  //To hold the data that is being dragged and dropped
   if (files.length === 1) {
     if (files[0].size < maxAllowedSize) {
-      fileInput.files = files;
+      fileInput.files = files;  //Transfer the dropped data into the files field
       uploadFile();
     } else {
       showToast("Max file size is 100MB");
@@ -43,21 +44,23 @@ dropZone.addEventListener("drop", (e) => {
   dropZone.classList.remove("dragged");
 });
 
-dropZone.addEventListener("dragover", (e) => {
+dropZone.addEventListener("dragover", (e) => {  //When data in dragged over the area
   e.preventDefault();
   dropZone.classList.add("dragged");
 
   // console.log("dropping file");
 });
 
-dropZone.addEventListener("dragleave", (e) => {
+dropZone.addEventListener("dragleave", (e) => {  //When the data being dragged leaves the area
+  e.preventDefault();
   dropZone.classList.remove("dragged");
 
   console.log("drag ended");
 });
 
 // file input change and uploader
-fileInput.addEventListener("change", () => {
+fileInput.addEventListener("change", (e) => {
+  e.preventDefault();
   if (fileInput.files[0].size > maxAllowedSize) {
     showToast("Max file size is 100MB");
     fileInput.value = ""; // reset the input
@@ -69,12 +72,12 @@ fileInput.addEventListener("change", () => {
 // sharing container listenrs
 copyURLBtn.addEventListener("click", () => {
   fileURL.select();
-  document.execCommand("copy");
+  document.execCommand("copy");  //Copies text to clipboard
   showToast("Copied to clipboard");
 });
 
 fileURL.addEventListener("click", () => {
-  fileURL.select();
+  fileURL.select();  //Selects the url
 });
 
 const uploadFile = () => {
@@ -90,8 +93,12 @@ const uploadFile = () => {
   // upload file
   const xhr = new XMLHttpRequest();
 
+  xhr.open("POST", uploadURL);
+  xhr.send(formData);
+
   // listen for upload progress
   xhr.upload.onprogress = function (event) {
+    event.preventDefault();
     // find the percentage of uploaded
     let percent = Math.round((100 * event.loaded) / event.total);
     progressPercent.innerText = percent;
@@ -107,19 +114,18 @@ const uploadFile = () => {
   };
 
   // listen for response which will give the link
-  xhr.onreadystatechange = function () {
+  xhr.onreadystatechange = function (e) {
+    e.preventDefault();
     if (xhr.readyState == XMLHttpRequest.DONE) {
       onFileUploadSuccess(xhr.responseText);
     }
   };
 
-  xhr.open("POST", uploadURL);
-  xhr.send(formData);
 };
 
 const onFileUploadSuccess = (res) => {
   fileInput.value = ""; // reset the input
-  status.innerText = "Uploaded";
+  console.log("Uploaded");
 
   // remove the disabled attribute from form btn & make text send
   emailForm[2].removeAttribute("disabled");
